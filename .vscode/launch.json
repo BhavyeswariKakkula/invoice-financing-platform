@@ -1,0 +1,43 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Backend: Debug API",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/backend",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
+      "console": "integratedTerminal",
+      "restart": true,
+      "sourceMaps": true,
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "env": {
+        "NODE_ENV": "development"
+      }
+    },
+    {
+      "name": "Frontend: Vite Dev Server",
+      "type": "pwa-chrome",
+      "request": "launch",
+      "url": "http://localhost:5173",
+      "webRoot": "${workspaceFolder}/frontend/src",
+      "sourceMaps": true,
+      "preLaunchTask": "frontend: start"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Full App: Backend + Frontend",
+      "configurations": [
+        "Backend: Debug API",
+        "Frontend: Vite Dev Server"
+      ]
+    }
+  ]
+}
