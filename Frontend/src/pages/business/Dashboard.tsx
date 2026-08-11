@@ -26,6 +26,7 @@ const Dashboard: React.FC = () => {
   if (loading) return <Layout><LoadingSpinner /></Layout>;
   if (!data) return <Layout><p>No data</p></Layout>;
 
+ 
   const { cards, charts } = data;
 
   return (

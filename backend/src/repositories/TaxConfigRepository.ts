@@ -15,8 +15,8 @@ class TaxConfigRepository {
   }
 
   async findActive() {
-    return await TaxConfig.findOne({ isActive: true });
-  }
+    return await TaxConfig.find({ isActive: true });
+}
 
   async updateById(id: string, data: Partial<ITaxConfig>) {
     return await TaxConfig.findByIdAndUpdate(id, data, { new: true });

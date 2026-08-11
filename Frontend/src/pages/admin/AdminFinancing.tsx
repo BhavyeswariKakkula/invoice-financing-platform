@@ -3,7 +3,7 @@ import Layout from '../../components/Layout';
 import StatusBadge from '../../components/StatusBadge';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import Modal from '../../components/Modal';
-import { financingAPI } from '../../api';
+import { financingAPI, taxConfigAPI } from '../../api';
 import toast from 'react-hot-toast';
 
 const AdminFinancing: React.FC = () => {
@@ -16,6 +16,8 @@ const AdminFinancing: React.FC = () => {
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
   const [approvedAmount, setApprovedAmount] = useState('');
   const [interestRate, setInterestRate] = useState('');
+
+  
   const [processingFee, setProcessingFee] = useState('');
   const [remarks, setRemarks] = useState('');
   const [processing, setProcessing] = useState(false);
@@ -42,8 +44,36 @@ const AdminFinancing: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchRequests();
-  }, [page, statusFilter]);
+  fetchRequests();
+
+  const fetchInterestRate = async () => {
+    try {
+      const { data } = await taxConfigAPI.getActive();
+
+console.log("API Response:", data);
+
+const configs = data.data || [];
+
+console.log("Configs:", configs);
+
+const interest = configs.find(
+  (item: any) => item.taxName === "Platform Interest"
+);
+
+console.log("Interest Config:", interest);
+
+
+if (interest) {
+  console.log("Setting interest rate:", interest.taxPercentage);
+  setInterestRate(String(interest.taxPercentage));
+}
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  fetchInterestRate();
+}, [page, statusFilter]);
 
   const handleApprove = async () => {
     setProcessing(true);
@@ -64,6 +94,8 @@ const AdminFinancing: React.FC = () => {
       setProcessing(false);
     }
   };
+  console.log("Current interestRate:", interestRate);
+
 
   const handleReject = async () => {
     setProcessing(true);
@@ -134,9 +166,19 @@ const AdminFinancing: React.FC = () => {
                       <td className="px-6 py-4">
                         <div className="flex gap-2">
                           {req.status === 'pending' && (
-                            <button onClick={() => { setSelectedRequest(req); setApprovedAmount(String(req.requestedAmount)); setInterestRate(''); setProcessingFee(''); setRemarks(''); setShowModal(true); }} className="px-3 py-1 bg-primary-600 text-white text-sm rounded-lg hover:bg-primary-700">
-                              Review
-                            </button>
+  <button
+    onClick={() => {
+      setSelectedRequest(req);
+      setApprovedAmount(String(req.requestedAmount));
+      setProcessingFee('');
+      setRemarks('');
+      setShowModal(true);
+    }}
+    className="px-3 py-1 bg-primary-600 text-white text-sm rounded-lg hover:bg-primary-700"
+  >
+    Review
+  </button>
+
                           )}
                           {req.status === 'approved' && (
                             <button onClick={() => handleDisburse(req._id)} className="px-3 py-1 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700">
@@ -190,9 +232,18 @@ const AdminFinancing: React.FC = () => {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Interest Rate (%)</label>
-                <input type="number" value={interestRate} onChange={(e) => setInterestRate(e.target.value)} className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none" min="0" step="0.1" required />
-              </div>
+  <label className="block text-sm font-medium text-gray-700 mb-1">
+    Interest Rate (%)
+  </label>
+
+  <div className="w-full px-3 py-2 border rounded-lg bg-gray-100 text-gray-700">
+    {interestRate}%
+  </div>
+
+  <p className="text-xs text-gray-500 mt-1">
+    Auto-loaded from Tax Management
+  </p>
+</div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Processing Fee</label>
                 <input type="number" value={processingFee} onChange={(e) => setProcessingFee(e.target.value)} className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none" min="0" required />
@@ -239,3 +290,4 @@ const AdminFinancing: React.FC = () => {
 };
 
 export default AdminFinancing;
+

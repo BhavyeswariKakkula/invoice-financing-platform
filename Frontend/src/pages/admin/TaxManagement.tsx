@@ -18,7 +18,10 @@ const TaxManagement: React.FC = () => {
     setLoading(true);
     try {
       const { data } = await taxConfigAPI.getAll();
-      setConfigs(data.data);
+
+console.log(data.data);
+
+setConfigs(data.data);
     } catch (error: any) {
       toast.error('Failed to load tax configurations');
     } finally {
@@ -88,13 +91,14 @@ const TaxManagement: React.FC = () => {
       toast.error(error.response?.data?.message || 'Failed to delete');
     }
   };
+  
 
   return (
     <Layout>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-black-600 text-4xl">
-  Interest Rate
+  Tax Management
 </h1>
           
         </div>
@@ -112,29 +116,64 @@ const TaxManagement: React.FC = () => {
               <table className="w-full">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"> Interest Type</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Interest Rate</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+  Configuration
+</th>
 
+<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+  Rate (%)
+</th>
+
+<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+  Status
+</th>
+
+<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+  Action
+</th>
                     
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {configs.map((config) => (
-                    <tr key={config._id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 text-sm font-medium text-gray-900"> Platform Interest</td>
-                      <td className="px-6 py-4 text-sm text-gray-600">{config.taxPercentage}%</td>
-                      <td className="px-6 py-4">
-                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          config.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
-                        }`}>
-                          {config.isActive ? <HiOutlineCheck className="w-3 h-3" /> : <HiOutlineX className="w-3 h-3" />}
-                          {config.isActive ? 'Active' : 'Inactive'}
-                        </span> 
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
+  {configs.map((config) => (
+    <tr key={config._id} className="hover:bg-gray-50">
+      <td className="px-6 py-4 text-sm font-medium text-gray-900">
+        {config.taxName}
+      </td>
+
+      <td className="px-6 py-4 text-sm text-gray-600">
+        {config.taxPercentage}%
+      </td>
+
+      <td className="px-6 py-4">
+        <span
+          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${
+            config.isActive
+              ? "bg-green-100 text-green-800"
+              : "bg-gray-100 text-gray-600"
+          }`}
+        >
+          {config.isActive ? (
+            <HiOutlineCheck className="w-3 h-3" />
+          ) : (
+            <HiOutlineX className="w-3 h-3" />
+          )}
+          {config.isActive ? "Active" : "Inactive"}
+        </span>
+      </td>
+
+      {/* Action Column */}
+      <td className="px-6 py-4">
+        <button
+          onClick={() => openEdit(config)}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg text-sm"
+        >
+          Edit
+        </button>
+      </td>
+    </tr>
+  ))}
+</tbody>
               </table>
             </div>
           </div>
@@ -146,22 +185,28 @@ const TaxManagement: React.FC = () => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Tax Name</label>
             <input
-              type="text"
-              value={formData.taxName}
-              onChange={(e) => setFormData({ ...formData, taxName: e.target.value })}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
-              placeholder="e.g. GST"
-              required
-            />
+  type="text"
+  value={formData.taxName}
+  className="w-full px-3 py-2 border rounded-lg bg-gray-100 cursor-not-allowed"
+  readOnly
+/>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Tax Percentage (%)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+  {formData.taxName === "Platform Interest"
+    ? "Interest Rate (%)"
+    : "GST Percentage (%)"}
+</label>
             <input
               type="number"
               value={formData.taxPercentage}
               onChange={(e) => setFormData({ ...formData, taxPercentage: e.target.value })}
               className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
-              placeholder="e.g. 18"
+              placeholder={
+  formData.taxName === "Platform Interest"
+    ? "e.g. 14"
+    : "e.g. 18"
+}
               required
               min="0"
               max="100"

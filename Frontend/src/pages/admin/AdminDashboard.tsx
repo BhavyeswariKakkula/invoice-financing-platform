@@ -37,27 +37,28 @@ const AdminDashboard: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard title="Total Businesses" value={cards.totalBusinesses} icon={<HiOutlineUserGroup className="w-6 h-6" />} color="primary" />
            <StatCard title="Total Invoices" value={cards.totalInvoices} icon={<HiOutlineDocumentText className="w-6 h-6" />} color="blue" />
-          
-        </div>
-
-        
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        
           <StatCard title="Active Loans" value={cards.activeLoans} icon={<HiOutlineClock className="w-6 h-6" />} color="blue" />
           <StatCard title="Completed Loans" value={cards.completedLoans} icon={<HiOutlineCheckCircle className="w-6 h-6" />} color="green" />
           
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+          
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <StatCard title="Total Financed" value={`₹${(cards.totalFinancedAmount || 0).toLocaleString('en-IN')}`} icon={<HiOutlineCurrencyDollar   className="w-6 h-6" />} color="purple" />
           <StatCard title="Total Collected" value={`₹${(cards.totalPaidAmount || 0).toLocaleString('en-IN')}`} icon={<HiOutlineCheckCircle className="w-6 h-6" />} color="green" />
           <StatCard title="Outstanding" value={`₹${(cards.totalOutstanding || 0).toLocaleString('en-IN')}`} icon={<HiOutlineExclamationCircle className="w-6 h-6" />} color="red" />
+           <StatCard title="Interest Earned" value={`₹${(cards.interestEarned || 0).toLocaleString('en-IN')}`} icon={<HiOutlineCurrencyDollar className="w-6 h-6" />} color="green" />
+         
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           
-          <StatCard title="Interest Earned" value={`₹${(cards.interestEarned || 0).toLocaleString('en-IN')}`} icon={<HiOutlineCurrencyDollar className="w-6 h-6" />} color="green" />
          
         </div>
 

@@ -147,7 +147,17 @@ const Financing: React.FC = () => {
         <form onSubmit={handleCreate} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Select Verified Invoice</label>
-            <select value={formData.invoiceId} onChange={(e) => setFormData({ ...formData, invoiceId: e.target.value })} className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none" required>
+            <select value={formData.invoiceId} onChange={(e) => {
+  const selectedInvoice = verifiedInvoices.find(
+    (inv) => inv._id === e.target.value
+  );
+
+  setFormData({
+    ...formData,
+    invoiceId: e.target.value,
+    requestedAmount: selectedInvoice?.totalAmount || 0,
+  });
+}} className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none" required>
               <option value="">Select a verified invoice</option>
               {verifiedInvoices.map((inv) => (
                 <option key={inv._id} value={inv._id}>{inv.invoiceNumber} - ₹{inv.totalAmount?.toLocaleString('en-IN')}</option>
@@ -157,7 +167,9 @@ const Financing: React.FC = () => {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Requested Amount</label>
-              <input type="number" value={formData.requestedAmount} onChange={(e) => setFormData({ ...formData, requestedAmount: e.target.value })} className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none" required min="1" />
+              <input type="number" value={formData.requestedAmount} 
+              readOnly 
+              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none" required  />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Tenure (months)</label>

@@ -18,11 +18,18 @@ const Invoices: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [activeTax, setActiveTax] = useState<{ taxName: string; taxPercentage: number }>({ taxName: 'No Tax', taxPercentage: 0 });
+  const [activeInterest, setActiveInterest] = useState<{
+  taxName: string;
+  taxPercentage: number;
+}>({
+  taxName: "Platform Interest",
+  taxPercentage: 0,
+});
   const [formData, setFormData] = useState({
     buyerName: '',
     buyerCompany: '',
     invoiceAmount: '',
-    invoiceDate: '',
+    invoiceDate: new Date().toISOString().split("T")[0],
     dueDate: '',
     currency: 'INR',
   });
@@ -32,6 +39,7 @@ const Invoices: React.FC = () => {
   const invoiceAmount = Number(formData.invoiceAmount) || 0;
   const taxAmount = (invoiceAmount * activeTax.taxPercentage) / 100;
   const totalAmount = invoiceAmount + taxAmount;
+  
 
   const fetchInvoices = async () => {
     setLoading(true);
@@ -55,15 +63,30 @@ const Invoices: React.FC = () => {
 
   useEffect(() => {
     const fetchActiveTax = async () => {
-      try {
-        const { data } = await taxConfigAPI.getActive();
-        if (data.data?.taxPercentage > 0) {
-          setActiveTax(data.data);
-        }
-      } catch (e) {
-        // No active tax config is fine
-      }
-    };
+  try {
+    const { data } = await taxConfigAPI.getActive();
+
+    const configs = data.data || [];
+
+    const gst = configs.find(
+      (item: any) => item.taxName === "GST"
+    );
+
+    const interest = configs.find(
+      (item: any) => item.taxName === "Platform Interest"
+    );
+
+    if (gst) {
+      setActiveTax(gst);
+    }
+
+    if (interest) {
+      setActiveInterest(interest);
+    }
+  } catch (e) {
+    console.error(e);
+  }
+};
     fetchActiveTax();
   }, []);
 
@@ -76,8 +99,18 @@ const Invoices: React.FC = () => {
     e.preventDefault();
     setCreating(true);
     try {
+      // Auto-generate Due Date (30 days after Invoice Date)
+const dueDate = new Date(formData.invoiceDate);
+dueDate.setDate(dueDate.getDate() + 30);
+
+const updatedFormData = {
+  ...formData,
+  dueDate: dueDate.toISOString().split("T")[0],
+};
       const fd = new FormData();
-      Object.entries(formData).forEach(([key, value]) => fd.append(key, value));
+      Object.entries(updatedFormData).forEach(([key, value]) =>
+  fd.append(key, value)
+);
       fd.append('taxPercentage', String(activeTax.taxPercentage));
       if (invoiceFile) fd.append('invoiceFile', invoiceFile);
       await invoiceAPI.create(fd);
@@ -250,28 +283,62 @@ const Invoices: React.FC = () => {
           </div>
 
           {activeTax.taxPercentage > 0 && (
-            <div className="bg-gray-50 rounded-lg p-4 space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Tax ({activeTax.taxName} @ {activeTax.taxPercentage}%)</span>
-                <span className="font-medium">₹{taxAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
-              </div>
-              <div className="flex justify-between text-sm border-t border-gray-200 pt-2">
-                <span className="font-medium text-gray-900">Total Amount</span>
-                <span className="font-bold text-gray-900">₹{totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
-              </div>
-            </div>
-          )}
+  <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+
+    <div className="flex justify-between text-sm">
+      <span className="text-gray-600">
+        Tax ({activeTax.taxName} @ {activeTax.taxPercentage}%)
+      </span>
+      <span className="font-medium">
+        ₹{taxAmount.toLocaleString("en-IN", {
+          minimumFractionDigits: 2,
+        })}
+      </span>
+    </div>
+
+    {/* Interest Rate */}
+    <div className="flex justify-between text-sm">
+      <span className="text-gray-600">
+        Interest Rate ({activeInterest.taxPercentage}% p.a.)
+      </span>
+      <span className="font-medium">
+        {activeInterest.taxPercentage}%
+      </span>
+    </div>
+    
+
+    <div className="flex justify-between text-sm border-t border-gray-200 pt-2">
+      <span className="font-medium text-gray-900">
+  Invoice Total
+</span>
+
+<span className="font-bold text-gray-900">
+  ₹
+  {totalAmount.toLocaleString("en-IN", {
+    minimumFractionDigits: 2,
+  })}
+</span>
+    </div>
+
+  </div>
+)}
+<p className="text-xs text-gray-500 mt-2">
+  * Platform interest is shown for your reference. It is charged only
+  after financing is approved and is calculated based on the approved
+  financing amount and tenure.
+</p>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Invoice Date</label>
-              <input type="date" value={formData.invoiceDate} onChange={(e) => setFormData({ ...formData, invoiceDate: e.target.value })} className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none" required />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Due Date</label>
-              <input type="date" value={formData.dueDate} onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })} className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none" required />
-            </div>
+              <input type="date"
+  value={formData.invoiceDate}
+readOnly
+  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+  required
+/>    </div>
           </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Attachment (optional)</label>
             <input type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={(e) => setInvoiceFile(e.target.files?.[0] || null)} className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none" />

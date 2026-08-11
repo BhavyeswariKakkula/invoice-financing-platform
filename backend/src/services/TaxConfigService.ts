@@ -20,9 +20,10 @@ class TaxConfigService {
   }
 
   async getActiveTaxConfig() {
-    const config = await TaxConfigRepository.findActive();
-    return config || { taxName: "No Tax", taxPercentage: 0, isActive: false };
-  }
+  const configs = await TaxConfigRepository.findActive();
+
+  return configs;
+}
 
   async updateTaxConfig(configId: string, data: { taxName?: string; taxPercentage?: number }) {
     const config = await TaxConfigRepository.findById(configId);

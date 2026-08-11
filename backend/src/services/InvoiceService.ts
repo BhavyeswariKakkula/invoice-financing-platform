@@ -82,12 +82,15 @@ const generateInvoicePdf = (
       .font("Helvetica").text(invoiceNumber);
     doc.moveDown(0.3);
 
-    // Dates
-    doc.fontSize(11).font("Helvetica-Bold").text(`Invoice Date: `, { continued: true })
-      .font("Helvetica").text(data.invoiceDate);
-    doc.fontSize(11).font("Helvetica-Bold").text(`Due Date: `, { continued: true })
-      .font("Helvetica").text(data.dueDate);
-    doc.moveDown(1);
+    // Invoice Date
+doc
+  .fontSize(11)
+  .font("Helvetica-Bold")
+  .text("Invoice Date: ", { continued: true })
+  .font("Helvetica")
+  .text(new Date(data.invoiceDate).toLocaleDateString("en-IN"));
+
+doc.moveDown(1);
 
     // Horizontal line
     doc.moveTo(50, doc.y).lineTo(545, doc.y).stroke("#cccccc");
@@ -172,15 +175,16 @@ class InvoiceService {
     const totalAmount = invoiceAmount + taxAmount;
 
     const invoice = await InvoiceRepository.createInvoice({
-      ...invoiceData,
-      userId: userId as any,
-      invoiceNumber,
-      taxPercentage,
-      taxAmount,
-      totalAmount,
-      invoiceFile: undefined,
-      status: "draft",
-    });
+  ...invoiceData,
+  userId: userId as any,
+  invoiceNumber,
+  invoiceDate: new Date(), // Auto-generated
+  taxPercentage,
+  taxAmount,
+  totalAmount,
+  invoiceFile: undefined,
+  status: "draft",
+});
 
     // Generate invoice PDF
     const pdfUrl = await generateInvoicePdf(invoiceNumber, {

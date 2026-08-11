@@ -586,19 +586,19 @@ console.log("✅ Passed access check");
   : String(repayment.invoiceId);  
 
       if (paymentType === "close" || allPaid) {
-        await FinancingRequestRepository.updateById(
-  financingId,
-  { status: "completed" } as any,
-  session );
+  await FinancingRequestRepository.updateById(
+    financingId,
+    { status: "completed" } as any,
+    session
+  );
 
-        
-      }
-      await InvoiceRepository.updateById(
-  invoiceId,
-  {
-    status: "closed",
-  } as any
-);
+  await InvoiceRepository.updateById(
+    invoiceId,
+    {
+      status: "closed",
+    } as any
+  );
+}
 
       await session.commitTransaction();
     } catch (error) {
@@ -619,10 +619,7 @@ console.log("✅ Passed access check");
   closeDiscount
 );
       } else if (allPaid) {
-        await notificationService.sendRepaymentCompletedNotification(
-    businessId,
-    financingId
-);
+        
         
       } else {
         await notificationService.sendEmiVerifiedNotification(

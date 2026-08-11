@@ -37,7 +37,7 @@ const AdminInvoices: React.FC = () => {
         <h1 className="text-2xl font-bold text-gray-900">All Invoices</h1>
 
         <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }} className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none">
-          <option value="">All Status (excl. Draft)</option>
+          <option value="">All Status</option>
           <option value="submitted">Submitted</option>
           <option value="under_verification">Under Verification</option>
           <option value="verified">Verified</option>
